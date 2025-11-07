@@ -184,15 +184,8 @@ export function useSpriteManager(characterName: Ref<CharacterName>) {
     error.value = null
 
     try {
-      console.log('Available sprite map modules:', Object.keys(spriteMapModules))
-      console.log('Available sprite modules:', Object.keys(spriteModules).length)
-      console.log('Loading config for:', characterName.value)
-
       config.value = await loadCharacterConfig(characterName.value)
-      console.log('Config loaded:', config.value)
-
       await preloadAllSprites(characterName.value)
-      console.log('All sprites preloaded')
     } catch (err) {
       error.value = err instanceof Error ? err : new Error(String(err))
       console.error('Failed to initialize sprite manager:', error.value)

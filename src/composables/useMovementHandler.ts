@@ -2,6 +2,8 @@ import { ref } from 'vue'
 import type { Position, Velocity } from '@/types/character'
 import type { Direction } from '@/types/states'
 
+const DIRECTION_TIMES_THRESHOLD = 1.5
+
 export interface MovementOptions {
   followRadius?: number
   moveSpeed?: number
@@ -17,6 +19,7 @@ export function useMovementHandler(options: MovementOptions = {}) {
   const dragOffset = ref<Position>({ x: 0, y: 0 })
   const mousePosition = ref<Position>({ x: 0, y: 0 })
   const isMouseOver = ref(false)
+  const centerOffset = ref<Position>({ x: 150, y: 150 }) // Will be set by component
 
   /**
    * Updates cursor position for following behavior
@@ -29,12 +32,11 @@ export function useMovementHandler(options: MovementOptions = {}) {
    * Calculates velocity to follow the cursor
    */
   function calculateFollowVelocity(): Velocity {
-    if (!isMouseOver.value) {
-      return { x: 0, y: 0 }
-    }
-
-    const dx = mousePosition.value.x - position.value.x
-    const dy = mousePosition.value.y - position.value.y
+    // Calculate from center of gremlin
+    const centerX = position.value.x + centerOffset.value.x
+    const centerY = position.value.y + centerOffset.value.y
+    const dx = mousePosition.value.x - centerX
+    const dy = mousePosition.value.y - centerY
     const distance = Math.sqrt(dx * dx + dy * dy)
 
     // Only follow if outside the follow radius
@@ -50,6 +52,13 @@ export function useMovementHandler(options: MovementOptions = {}) {
       x: dirX * moveSpeed,
       y: dirY * moveSpeed,
     }
+  }
+
+  /**
+   * Sets the center offset for distance calculations
+   */
+  function setCenterOffset(offsetX: number, offsetY: number): void {
+    centerOffset.value = { x: offsetX, y: offsetY }
   }
 
   /**
@@ -72,6 +81,8 @@ export function useMovementHandler(options: MovementOptions = {}) {
     if (vx < 0) horizontal = 'Left'
     else if (vx > 0) horizontal = 'Right'
 
+    if (Math.abs(vx / vy) > DIRECTION_TIMES_THRESHOLD) return horizontal as Direction
+    if (Math.abs(vy / vx) > DIRECTION_TIMES_THRESHOLD) return vertical as Direction
     return (vertical + horizontal) as Direction
   }
 
@@ -152,5 +163,6 @@ export function useMovementHandler(options: MovementOptions = {}) {
     updatePosition,
     setMouseOver,
     isMoving,
+    setCenterOffset,
   }
 }

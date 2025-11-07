@@ -18,12 +18,8 @@ export function useAnimation(
    * Initializes the canvas context
    */
   function initCanvas(): void {
-    if (!canvasRef.value) {
-      console.error('Canvas ref is null!')
-      return
-    }
+    if (!canvasRef.value) return
     ctx.value = canvasRef.value.getContext('2d')
-    console.log('Canvas context initialized:', ctx.value)
   }
 
   /**
@@ -82,16 +78,10 @@ export function useAnimation(
     frameCount: number,
     getSprite: (fileName: string) => Promise<HTMLImageElement | null>
   ): Promise<number> {
-    if (frameCount === 0) {
-      console.warn('Frame count is 0 for', spriteFileName)
-      return currentFrame
-    }
+    if (frameCount === 0) return currentFrame
 
     const sprite = await getSprite(spriteFileName)
-    if (!sprite) {
-      console.warn('Sprite not loaded:', spriteFileName)
-      return currentFrame
-    }
+    if (!sprite) return currentFrame
 
     const nextFrame = renderFrame(sprite, currentFrame, frameCount)
 

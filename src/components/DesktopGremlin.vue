@@ -52,6 +52,7 @@ const props = defineProps<{
 const containerRef = ref<HTMLDivElement | null>(null)
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const characterName = ref<CharacterName>(props.character)
+const shouldFollowCursor = ref(false)
 
 // Composables
 const { config, loading, error, getSprite, initialize } = useSpriteManager(characterName)
@@ -206,10 +207,7 @@ function stopEmoteDurationTimer(): void {
 
 // Animation tick
 async function animationTick(): Promise<void> {
-  if (!config.value) {
-    console.warn('animationTick called but config is null')
-    return
-  }
+  if (!config.value) return
 
   const state = stateMachine.currentState.value
   const frames = stateMachine.currentFrames.value
@@ -300,6 +298,8 @@ async function animationTick(): Promise<void> {
       break
     case State.WALKING:
       // Handle walking with direction
+      movement.updatePosition()
+
       const direction = movement.getAnimationDirection()
       if (direction) {
         const directionKey = direction as keyof typeof frames
@@ -313,7 +313,6 @@ async function animationTick(): Promise<void> {
           getSprite
         )
       }
-      movement.updatePosition()
       break
   }
 }
@@ -335,36 +334,32 @@ function handleMouseEnter(): void {
   movement.setMouseOver(true)
   resetIdleTimer()
 
-  if (stateMachine.currentState.value === State.IDLE) {
+  if (stateMachine.currentState.value === State.IDLE || stateMachine.currentState.value === State.WALKING) {
     stateMachine.setState(State.HOVER)
   }
 
-  // Note: hover.wav sound file not available in character assets
-  // Uncomment if you add hover.wav to the sounds folder:
-  // if (
-  //   stateMachine.currentState.value !== State.WALKING &&
-  //   stateMachine.currentState.value !== State.SLEEPING &&
-  //   stateMachine.currentState.value !== State.CLICK &&
-  //   stateMachine.currentState.value !== State.DRAGGING &&
-  //   stateMachine.currentState.value !== State.EMOTE
-  // ) {
-  //   playSound('hover.wav', 3)
-  // }
+  if (
+    stateMachine.currentState.value !== State.WALKING &&
+    stateMachine.currentState.value !== State.SLEEPING &&
+    stateMachine.currentState.value !== State.CLICK &&
+    stateMachine.currentState.value !== State.DRAGGING &&
+    stateMachine.currentState.value !== State.EMOTE
+  ) {
+    playSound('hover.wav', 3)
+  }
 }
 
 function handleMouseLeave(): void {
-  movement.setMouseOver(false)
+  if (stateMachine.currentState.value !== State.WALKING) {
+    movement.setMouseOver(false)
+  }
 
-  if (stateMachine.currentState.value === State.WALKING) {
-    stateMachine.setState(State.WALK_IDLE)
-  } else if (stateMachine.currentState.value === State.HOVER) {
+  if (stateMachine.currentState.value === State.HOVER) {
     stateMachine.setState(State.IDLE)
   }
 }
 
 function handleMouseMove(event: MouseEvent): void {
-  movement.updateMousePosition(event.clientX, event.clientY)
-
   if (movement.isDragging.value) {
     movement.updateDrag(event.clientX, event.clientY)
   }
@@ -431,20 +426,66 @@ function handleHeadPat(event: MouseEvent): void {
   ) {
     resetIdleTimer()
     stateMachine.setState(State.PAT)
+    // only follow cursor after head pad
+    shouldFollowCursor.value = true
+  }
+}
+
+// Global mouse tracking for cursor following
+function handleGlobalMouseMove(event: MouseEvent): void {
+  movement.updateMousePosition(event.clientX, event.clientY)
+
+  // Calculate distance from gremlin center to cursor
+  const centerX = movement.position.value.x + canvasSize.value.width / 2
+  const centerY = movement.position.value.y + canvasSize.value.height / 2
+  const dx = event.clientX - centerX
+  const dy = event.clientY - centerY
+  const distance = Math.sqrt(dx * dx + dy * dy)
+
+  if (
+    stateMachine.currentState.value !== State.DRAGGING &&
+    stateMachine.currentState.value !== State.PAT &&
+    stateMachine.currentState.value !== State.CLICK &&
+    stateMachine.currentState.value !== State.SLEEPING &&
+    stateMachine.currentState.value !== State.EMOTE &&
+    stateMachine.currentState.value !== State.WALK_IDLE
+  ) {
+    if (distance > 150 && distance < 400) { // followRadius
+      if (stateMachine.currentState.value !== State.WALKING && shouldFollowCursor.value) {
+        stateMachine.setState(State.WALKING)
+        resetIdleTimer()
+      }
+    }
+  }
+
+  // Continue walking if already walking, stop when within radius
+  if (stateMachine.currentState.value === State.WALKING) {
+    // reach the target
+    if (distance <= 150) {
+      stateMachine.setState(State.WALK_IDLE)
+      shouldFollowCursor.value = false
+    }
+
+    // target to far
+    if (distance >= 600) {
+      // TODO: do something different?
+      stateMachine.setState(State.WALK_IDLE)
+      shouldFollowCursor.value = false
+    }
   }
 }
 
 // Lifecycle
 onMounted(async () => {
-  console.log('DesktopGremlin mounted')
-
   await initialize()
-  console.log('Initialization complete, config:', config.value)
-
   await preloadSounds(characterName.value)
 
   if (config.value) {
-    console.log('Starting animation loop')
+    // Set center offset for movement calculations
+    movement.setCenterOffset(
+      config.value.spriteMap.FrameWidth / 2,
+      config.value.spriteMap.FrameHeight / 2
+    )
 
     // Initialize canvas
     animation.initCanvas()
@@ -456,6 +497,9 @@ onMounted(async () => {
     )
     animation.startAnimationLoop(frameRateLimitedTick)
 
+    // Add global mouse tracking for cursor following
+    document.addEventListener('mousemove', handleGlobalMouseMove)
+
     // Start timers
     resetIdleTimer()
     if (config.value.emoteConfig.AnnoyEmote) {
@@ -464,13 +508,12 @@ onMounted(async () => {
 
     // Play intro sound
     playSound('intro.wav')
-  } else {
-    console.error('Config is null after initialization!')
   }
 })
 
 onUnmounted(() => {
   animation.stopAnimationLoop()
+  document.removeEventListener('mousemove', handleGlobalMouseMove)
   if (idleTimerId.value !== null) clearTimeout(idleTimerId.value)
   if (walkIdleTimerId.value !== null) clearTimeout(walkIdleTimerId.value)
   if (emoteTimerId.value !== null) clearTimeout(emoteTimerId.value)
