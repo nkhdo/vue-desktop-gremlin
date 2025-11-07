@@ -2,36 +2,6 @@
   "name": "@nkhdo/desktop-gremlin",
   "version": "0.1.0",
   "description": "Animated desktop pet component for Vue 3",
-  "type": "module",
-  "main": "./dist/desktop-gremlin.umd.cjs",
-  "module": "./dist/desktop-gremlin.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/desktop-gremlin.js",
-      "require": "./dist/desktop-gremlin.umd.cjs",
-      "types": "./dist/index.d.ts"
-    },
-    "./style.css": "./dist/style.css"
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
-  },
-  "peerDependencies": {
-    "vue": "^3.3.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.0",
-    "typescript": "^5.3.0",
-    "vite": "^5.0.0",
-    "vue": "^3.4.0",
-    "vue-tsc": "^2.0.0"
-  },
   "keywords": [
     "vue",
     "vue3",
@@ -40,9 +10,48 @@
     "animation",
     "gremlin"
   ],
-  "author": "nkhdo",
+  "homepage": "https://github.com/nkhdo/vue-desktop-gremlin#readme",
+  "bugs": {
+    "url": "https://github.com/nkhdo/vue-desktop-gremlin/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nkhdo/vue-desktop-gremlin.git"
+  },
   "license": "MIT",
+  "author": "nkhdo",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/desktop-gremlin.js",
+      "require": "./dist/desktop-gremlin.umd.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "main": "./dist/desktop-gremlin.umd.cjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "@vueuse/core": "^14.0.0"
-  }
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^4.5.4",
+    "vue": "^3.4.0",
+    "vue-tsc": "^2.0.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "module": "./dist/desktop-gremlin.js"
 }
