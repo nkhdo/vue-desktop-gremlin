@@ -35,6 +35,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, type CSSProperties } from 'vue'
+import { useDebounceFn, useThrottleFn } from '@vueuse/core'
 import { State } from '@/types/states'
 import type { CharacterName } from '@/types/character'
 import { useSpriteManager } from '@/composables/useSpriteManager'
@@ -330,7 +331,7 @@ function handleAnimationComplete(state: State): void {
 }
 
 // Event handlers
-function handleMouseEnter(): void {
+const handleMouseEnter = useDebounceFn(function (): void {
   movement.setMouseOver(true)
   resetIdleTimer()
 
@@ -347,7 +348,7 @@ function handleMouseEnter(): void {
   ) {
     playSound('hover.wav', 3)
   }
-}
+}, 100)
 
 function handleMouseLeave(): void {
   if (stateMachine.currentState.value !== State.WALKING) {
@@ -432,7 +433,7 @@ function handleHeadPat(event: MouseEvent): void {
 }
 
 // Global mouse tracking for cursor following
-function handleGlobalMouseMove(event: MouseEvent): void {
+const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
   movement.updateMousePosition(event.clientX, event.clientY)
 
   // Calculate distance from gremlin center to cursor
@@ -473,7 +474,7 @@ function handleGlobalMouseMove(event: MouseEvent): void {
       shouldFollowCursor.value = false
     }
   }
-}
+}, 100)
 
 // Lifecycle
 onMounted(async () => {
