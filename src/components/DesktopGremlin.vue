@@ -206,7 +206,10 @@ function stopEmoteDurationTimer(): void {
 
 // Animation tick
 async function animationTick(): Promise<void> {
-  if (!config.value) return
+  if (!config.value) {
+    console.warn('animationTick called but config is null')
+    return
+  }
 
   const state = stateMachine.currentState.value
   const frames = stateMachine.currentFrames.value
@@ -336,15 +339,17 @@ function handleMouseEnter(): void {
     stateMachine.setState(State.HOVER)
   }
 
-  if (
-    stateMachine.currentState.value !== State.WALKING &&
-    stateMachine.currentState.value !== State.SLEEPING &&
-    stateMachine.currentState.value !== State.CLICK &&
-    stateMachine.currentState.value !== State.DRAGGING &&
-    stateMachine.currentState.value !== State.EMOTE
-  ) {
-    playSound('hover.wav', 3)
-  }
+  // Note: hover.wav sound file not available in character assets
+  // Uncomment if you add hover.wav to the sounds folder:
+  // if (
+  //   stateMachine.currentState.value !== State.WALKING &&
+  //   stateMachine.currentState.value !== State.SLEEPING &&
+  //   stateMachine.currentState.value !== State.CLICK &&
+  //   stateMachine.currentState.value !== State.DRAGGING &&
+  //   stateMachine.currentState.value !== State.EMOTE
+  // ) {
+  //   playSound('hover.wav', 3)
+  // }
 }
 
 function handleMouseLeave(): void {
@@ -431,10 +436,19 @@ function handleHeadPat(event: MouseEvent): void {
 
 // Lifecycle
 onMounted(async () => {
+  console.log('DesktopGremlin mounted')
+
   await initialize()
+  console.log('Initialization complete, config:', config.value)
+
   await preloadSounds(characterName.value)
 
   if (config.value) {
+    console.log('Starting animation loop')
+
+    // Initialize canvas
+    animation.initCanvas()
+
     // Start animation loop
     const frameRateLimitedTick = animation.createFrameRateLimitedTick(
       config.value.spriteMap.FrameRate,
@@ -450,6 +464,8 @@ onMounted(async () => {
 
     // Play intro sound
     playSound('intro.wav')
+  } else {
+    console.error('Config is null after initialization!')
   }
 })
 

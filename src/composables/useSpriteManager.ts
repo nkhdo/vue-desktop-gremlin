@@ -1,6 +1,26 @@
 import { ref, type Ref } from 'vue'
 import type { CharacterName, CharacterConfig } from '@/types/character'
 
+// Import all character configs using Vite's glob import
+const spriteMapModules = import.meta.glob<{ default: any }>(
+  '../assets/characters/*/sprite-map.json',
+  { eager: true }
+)
+const frameCountModules = import.meta.glob<{ default: any }>(
+  '../assets/characters/*/frame-count.json',
+  { eager: true }
+)
+const emoteConfigModules = import.meta.glob<{ default: any }>(
+  '../assets/characters/*/emote-config.json',
+  { eager: true }
+)
+
+// Import all sprite images
+const spriteModules = import.meta.glob<string>(
+  '../assets/characters/*/*.png',
+  { eager: true, import: 'default', query: '?url' }
+)
+
 /**
  * Cache for loaded sprite images
  */
@@ -15,6 +35,21 @@ export function useSpriteManager(characterName: Ref<CharacterName>) {
   const config = ref<CharacterConfig | null>(null)
   const loading = ref(false)
   const error = ref<Error | null>(null)
+
+  /**
+   * Gets the URL for a sprite file
+   */
+  function getSpriteUrl(character: CharacterName, fileName: string): string {
+    const path = `../assets/characters/${character}/${fileName}`
+
+    for (const [key, value] of Object.entries(spriteModules)) {
+      if (key.includes(`/${character}/${fileName}`)) {
+        return value as string
+      }
+    }
+
+    throw new Error(`Sprite not found: ${path}`)
+  }
 
   /**
    * Loads a sprite image from the assets
@@ -43,12 +78,11 @@ export function useSpriteManager(characterName: Ref<CharacterName>) {
         reject(new Error(`Failed to load sprite: ${cacheKey}`))
       }
 
-      // In the built library, we'll use dynamic imports for assets
-      // For now, we'll use a path that Vite will resolve
-      img.src = new URL(
-        `../assets/characters/${character}/${fileName}`,
-        import.meta.url
-      ).href
+      try {
+        img.src = getSpriteUrl(character, fileName)
+      } catch (err) {
+        reject(err)
+      }
     })
   }
 
@@ -64,18 +98,25 @@ export function useSpriteManager(characterName: Ref<CharacterName>) {
     }
 
     try {
-      // Dynamically import JSON configs
-      const [spriteMapModule, frameCountModule, emoteConfigModule] =
-        await Promise.all([
-          import(`../assets/characters/${character}/sprite-map.json`),
-          import(`../assets/characters/${character}/frame-count.json`),
-          import(`../assets/characters/${character}/emote-config.json`),
-        ])
+      // Find the config modules for this character
+      const spriteMapKey = Object.keys(spriteMapModules).find(key =>
+        key.includes(`/${character}/sprite-map.json`)
+      )
+      const frameCountKey = Object.keys(frameCountModules).find(key =>
+        key.includes(`/${character}/frame-count.json`)
+      )
+      const emoteConfigKey = Object.keys(emoteConfigModules).find(key =>
+        key.includes(`/${character}/emote-config.json`)
+      )
+
+      if (!spriteMapKey || !frameCountKey || !emoteConfigKey) {
+        throw new Error(`Configuration files not found for character: ${character}`)
+      }
 
       const characterConfig: CharacterConfig = {
-        spriteMap: spriteMapModule.default,
-        frameCount: frameCountModule.default,
-        emoteConfig: emoteConfigModule.default,
+        spriteMap: spriteMapModules[spriteMapKey].default,
+        frameCount: frameCountModules[frameCountKey].default,
+        emoteConfig: emoteConfigModules[emoteConfigKey].default,
       }
 
       configCache.set(character, characterConfig)
@@ -143,8 +184,15 @@ export function useSpriteManager(characterName: Ref<CharacterName>) {
     error.value = null
 
     try {
+      console.log('Available sprite map modules:', Object.keys(spriteMapModules))
+      console.log('Available sprite modules:', Object.keys(spriteModules).length)
+      console.log('Loading config for:', characterName.value)
+
       config.value = await loadCharacterConfig(characterName.value)
+      console.log('Config loaded:', config.value)
+
       await preloadAllSprites(characterName.value)
+      console.log('All sprites preloaded')
     } catch (err) {
       error.value = err instanceof Error ? err : new Error(String(err))
       console.error('Failed to initialize sprite manager:', error.value)

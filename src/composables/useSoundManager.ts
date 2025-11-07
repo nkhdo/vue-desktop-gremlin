@@ -1,6 +1,12 @@
 import { ref, type Ref } from 'vue'
 import type { CharacterName } from '@/types/character'
 
+// Import all sound files using Vite's glob import
+const soundModules = import.meta.glob<string>(
+  '../assets/characters/*/sounds/*.wav',
+  { eager: true, import: 'default', query: '?url' }
+)
+
 /**
  * Sound cache and playback manager
  */
@@ -10,6 +16,18 @@ const lastPlayed = new Map<string, number>()
 export function useSoundManager(characterName: Ref<CharacterName>) {
   const soundEnabled = ref(false)
   const volume = ref(0.8)
+
+  /**
+   * Gets the URL for a sound file
+   */
+  function getSoundUrl(character: CharacterName, fileName: string): string {
+    for (const [key, value] of Object.entries(soundModules)) {
+      if (key.includes(`/${character}/sounds/${fileName}`)) {
+        return value as string
+      }
+    }
+    throw new Error(`Sound not found: ${character}/sounds/${fileName}`)
+  }
 
   /**
    * Loads a sound file
@@ -29,11 +47,7 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
     const audio = new Audio()
 
     try {
-      // Use dynamic import for sound files
-      audio.src = new URL(
-        `../assets/characters/${character}/sounds/${fileName}`,
-        import.meta.url
-      ).href
+      audio.src = getSoundUrl(character, fileName)
       audio.volume = volume.value
 
       // Preload the audio
@@ -82,7 +96,8 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
       await playInstance.play()
       lastPlayed.set(cacheKey, Date.now())
     } catch (err) {
-      console.error(`Error playing sound ${fileName}:`, err)
+      // Silently fail for missing sound files - they're optional
+      // console.warn(`Sound file not available: ${fileName}`)
     }
   }
 

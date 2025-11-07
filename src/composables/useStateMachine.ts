@@ -112,7 +112,8 @@ export function useStateMachine(
     // Handle sound effects on state entry
     switch (newState) {
       case State.DRAGGING:
-        callbacks.onSoundPlay?.('grab.wav')
+        // Note: grab.wav not available in character assets
+        // callbacks.onSoundPlay?.('grab.wav')
         break
       case State.WALKING:
         if (oldState !== State.WALKING) {
