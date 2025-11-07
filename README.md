@@ -19,7 +19,7 @@ Ported from [linux-desktop-gremlin](https://github.com/iluvgirlswithglasses/linu
 ## Installation
 
 ```bash
-npm install @nkhdo/desktop-gremlin
+pnpm install @nkhdo/desktop-gremlin
 ```
 
 ## Usage
@@ -62,16 +62,16 @@ import '@nkhdo/desktop-gremlin/style.css'
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Run development demo (with hot reload)
-npm run dev
+pnpm run dev
 
 # Build the library
-npm run build
+pnpm run build
 
 # Preview production build
-npm run preview
+pnpm run preview
 ```
 
 The development server will start at `http://localhost:5173` with a demo page showcasing the component.
