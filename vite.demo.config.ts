@@ -10,6 +10,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
+  base: process.env.GITHUB_PAGES === 'true' ? '/vue-desktop-gremlin/' : '/',
   build: {
     outDir: 'dist-demo',
     emptyOutDir: true,

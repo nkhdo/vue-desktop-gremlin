@@ -4,6 +4,8 @@ A Vue 3 + TypeScript component library for animated desktop pets in web applicat
 
 Ported from [linux-desktop-gremlin](https://github.com/iluvgirlswithglasses/linux-desktop-gremlin).
 
+[**View Live Demo**](https://nkhdo.github.io/vue-desktop-gremlin/)
+
 ## Features
 
 - 🎨 Animated sprite-based characters
