@@ -24,12 +24,11 @@
   "exports": {
     ".": {
       "import": "./dist/desktop-gremlin.js",
-      "require": "./dist/desktop-gremlin.umd.cjs",
       "types": "./dist/index.d.ts"
     },
     "./style.css": "./dist/style.css"
   },
-  "main": "./dist/desktop-gremlin.umd.cjs",
+  "main": "./dist/desktop-gremlin.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"

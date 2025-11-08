@@ -20,16 +20,13 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'DesktopGremlin',
-      fileName: (format) => `desktop-gremlin.${format === 'es' ? 'js' : 'umd.cjs'}`,
+      formats: ['es'], // Only build ES module format
+      fileName: 'desktop-gremlin',
     },
     rollupOptions: {
       // Externalize deps that shouldn't be bundled
       external: ['vue'],
       output: {
-        // Global vars for UMD build
-        globals: {
-          vue: 'Vue',
-        },
         // Preserve asset structure
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith('.css')) {
