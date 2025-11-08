@@ -7,13 +7,14 @@ const DIRECTION_TIMES_THRESHOLD = 1.5
 export interface MovementOptions {
   followRadius?: number
   moveSpeed?: number
+  initialPosition?: { x: number, y: number }
 }
 
 export function useMovementHandler(options: MovementOptions = {}) {
-  const followRadius = options.followRadius ?? 50
+  const followRadius = options.followRadius ?? 10
   const moveSpeed = options.moveSpeed ?? 5
 
-  const position = ref<Position>({ x: 100, y: 100 })
+  const position = ref<Position>(options.initialPosition ?? { x: 0, y: 0 })
   const velocity = ref<Velocity>({ x: 0, y: 0 })
   const isDragging = ref(false)
   const dragOffset = ref<Position>({ x: 0, y: 0 })

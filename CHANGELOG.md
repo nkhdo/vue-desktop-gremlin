@@ -4,6 +4,8 @@
 ## 0.1.3
 ### Patch Changes
 - Improve hitbox & cursor following mechanism
+- Add more props
+- Improve demo page
 
 ## 0.1.2
 ### Patch Changes

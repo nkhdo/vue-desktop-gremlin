@@ -47,6 +47,7 @@
     :key="character"
     :character="character"
     :debug="debug"
+    :initial-position="{ x: 600, y: 100 }"
   />
 </template>
 
@@ -56,7 +57,6 @@ import DesktopGremlin from './components/DesktopGremlin.vue'
 import type { CharacterName } from './types/character'
 
 const character = ref<CharacterName>('mambo')
-const showGremlin = ref(true)
 const debug = ref(false)
 
 function changeCharacter(newCharacter: CharacterName) {

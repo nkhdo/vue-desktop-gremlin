@@ -58,6 +58,9 @@ import { useSoundManager } from '@/composables/useSoundManager'
 // Props
 const props = defineProps<{
   character: CharacterName
+  initialPosition?: { x: number, y: number }
+  followRadius?: number
+  moveSpeed?: number
   debug?: boolean
 }>()
 
@@ -69,7 +72,11 @@ const shouldFollowCursor = ref(false)
 // Composables
 const { config, loading, error, getSprite, initialize } = useSpriteManager(characterName)
 const { playSound, enableSound, preloadSounds } = useSoundManager(characterName)
-const movement = useMovementHandler({ followRadius: 10, moveSpeed: 5 })
+const movement = useMovementHandler({
+  followRadius: props.followRadius,
+  moveSpeed: props.moveSpeed,
+  initialPosition: props.initialPosition
+})
 
 // Timers
 const idleTimerId = ref<number | null>(null)
