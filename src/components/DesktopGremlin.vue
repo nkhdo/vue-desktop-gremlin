@@ -56,13 +56,18 @@ import { useMovementHandler } from '@/composables/useMovementHandler'
 import { useSoundManager } from '@/composables/useSoundManager'
 
 // Props
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   character: CharacterName
   initialPosition?: { x: number, y: number }
   followRadius?: number
   moveSpeed?: number
   debug?: boolean
-}>()
+}>(), {
+  initialPosition: () => ({ x: 0, y: 0 }),
+  followRadius: 50,
+  moveSpeed: 5,
+  debug: false
+})
 
 // Refs
 const canvasRef = useTemplateRef('canvasRef')
@@ -486,8 +491,12 @@ const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
     stateMachine.currentState.value !== State.EMOTE &&
     stateMachine.currentState.value !== State.WALK_IDLE
   ) {
-    if (distance > 10 && distance < 600) {
-      if (stateMachine.currentState.value !== State.WALKING && shouldFollowCursor.value) {
+    if (distance > props.followRadius && distance < props.followRadius * 10) {
+      if (
+        stateMachine.currentState.value !== State.WALKING &&
+        shouldFollowCursor.value &&
+        !movement.isMouseOver.value
+      ) {
         stateMachine.setState(State.WALKING)
         resetIdleTimer()
       }
@@ -497,14 +506,13 @@ const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
   // Continue walking if already walking, stop when within radius
   if (stateMachine.currentState.value === State.WALKING) {
     // reach the target
-    if (distance <= 10) {
-      console.log(2)
+    if (distance <= props.followRadius) {
       stateMachine.setState(State.WALK_IDLE)
       shouldFollowCursor.value = false
     }
 
     // target to far
-    if (distance >= 600) {
+    if (distance >= props.followRadius * 10) {
       console.log(3)
       // TODO: do something different?
       stateMachine.setState(State.WALK_IDLE)
@@ -521,8 +529,8 @@ onMounted(async () => {
   if (config.value) {
     // Set center offset for movement calculations
     movement.setCenterOffset(
-      config.value.spriteMap.FrameWidth / 2,
-      config.value.spriteMap.FrameHeight / 2
+      config.value.spriteMap.FrameWidth / 4,
+      (config.value.spriteMap.FrameHeight - (config.value.spriteMap.TopShift ?? 0)) / 2
     )
 
     // Initialize canvas

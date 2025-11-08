@@ -11,7 +11,7 @@ export interface MovementOptions {
 }
 
 export function useMovementHandler(options: MovementOptions = {}) {
-  const followRadius = options.followRadius ?? 10
+  const followRadius = options.followRadius ?? 50
   const moveSpeed = options.moveSpeed ?? 5
 
   const position = ref<Position>(options.initialPosition ?? { x: 0, y: 0 })
@@ -20,7 +20,7 @@ export function useMovementHandler(options: MovementOptions = {}) {
   const dragOffset = ref<Position>({ x: 0, y: 0 })
   const mousePosition = ref<Position>({ x: 0, y: 0 })
   const isMouseOver = ref(false)
-  const centerOffset = ref<Position>({ x: 150, y: 150 }) // Will be set by component
+  const centerOffset = ref<Position>({ x: 150, y: 150 })
 
   /**
    * Updates cursor position for following behavior
