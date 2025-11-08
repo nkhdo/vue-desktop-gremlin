@@ -5,6 +5,7 @@
     "FrameWidth": 300,
     "TopHotspotHeight": 175,
     "TopHotspotWidth": 150,
+    "TopShift": 75,
     "Idle": "idle.png",
     "Hover": "hover.png",
     "Click": "click.png",

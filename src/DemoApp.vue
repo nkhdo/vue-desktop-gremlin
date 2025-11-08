@@ -22,6 +22,10 @@
           Rice Shower
         </button>
       </div>
+      <div class="debug-selector">
+        <input id="input-debug" type="checkbox" v-model="debug" />
+        <label for="input-debug">Debug</label>
+      </div>
     </div>
 
     <div class="instructions">
@@ -39,7 +43,11 @@
   </div>
 
   <!-- The gremlin component -->
-  <DesktopGremlin v-if="showGremlin" :character="character" />
+  <DesktopGremlin
+    :key="character"
+    :character="character"
+    :debug="debug"
+  />
 </template>
 
 <script setup lang="ts">
@@ -49,13 +57,9 @@ import type { CharacterName } from './types/character'
 
 const character = ref<CharacterName>('mambo')
 const showGremlin = ref(true)
+const debug = ref(false)
 
 function changeCharacter(newCharacter: CharacterName) {
-  // Remount component when changing characters
-  showGremlin.value = false
   character.value = newCharacter
-  setTimeout(() => {
-    showGremlin.value = true
-  }, 100)
 }
 </script>

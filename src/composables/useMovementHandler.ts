@@ -10,7 +10,7 @@ export interface MovementOptions {
 }
 
 export function useMovementHandler(options: MovementOptions = {}) {
-  const followRadius = options.followRadius ?? 150
+  const followRadius = options.followRadius ?? 50
   const moveSpeed = options.moveSpeed ?? 5
 
   const position = ref<Position>({ x: 100, y: 100 })

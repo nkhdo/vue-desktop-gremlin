@@ -8,6 +8,7 @@ export interface SpriteMapConfig {
   FrameWidth: number
   TopHotspotHeight: number
   TopHotspotWidth: number
+  TopShift?: number
   Idle: string
   Hover: string
   Click: string

@@ -2,7 +2,6 @@
   <Teleport to="body">
     <div
       v-if="!loading && !error"
-      ref="containerRef"
       class="desktop-gremlin"
       :style="containerStyle"
       @mouseenter="handleMouseEnter"
@@ -15,13 +14,14 @@
         ref="canvasRef"
         :width="canvasSize.width"
         :height="canvasSize.height"
+        :style="canvasStyle"
         class="desktop-gremlin__canvas"
       />
       <div
         v-if="headHotspot"
         class="desktop-gremlin__hotspot"
         :style="hotspotStyle"
-        @mousedown.stop="handleHeadPat"
+        @mousedown.left.stop="handleHeadPat"
       />
     </div>
     <div v-else-if="loading" class="desktop-gremlin__loading">
@@ -30,6 +30,17 @@
     <div v-else-if="error" class="desktop-gremlin__error">
       Error: {{ error.message }}
     </div>
+    <div
+      v-if="debug"
+      :style="{
+        position: 'fixed',
+        top: `${centerPoint.y}px`,
+        left: `${centerPoint.x}px`,
+        zIndex: 10000,
+        color: 'red',
+        pointerEvents: 'none'
+      }"
+    >•</div>
   </Teleport>
 </template>
 
@@ -47,6 +58,7 @@ import { useSoundManager } from '@/composables/useSoundManager'
 // Props
 const props = defineProps<{
   character: CharacterName
+  debug?: boolean
 }>()
 
 // Refs
@@ -57,7 +69,7 @@ const shouldFollowCursor = ref(false)
 // Composables
 const { config, loading, error, getSprite, initialize } = useSpriteManager(characterName)
 const { playSound, enableSound, preloadSounds } = useSoundManager(characterName)
-const movement = useMovementHandler({ followRadius: 150, moveSpeed: 5 })
+const movement = useMovementHandler({ followRadius: 10, moveSpeed: 5 })
 
 // Timers
 const idleTimerId = ref<number | null>(null)
@@ -110,32 +122,38 @@ const containerStyle = computed((): CSSProperties => ({
   position: 'fixed',
   left: `${movement.position.value.x}px`,
   top: `${movement.position.value.y}px`,
-  width: `${canvasSize.value.width}px`,
-  height: `${canvasSize.value.height}px`,
+  width: `${canvasSize.value.width / 2}px`,
+  height: `${canvasSize.value.height - (config.value?.spriteMap.TopShift ?? 0)}px`,
   cursor: movement.isDragging.value ? 'grabbing' : 'grab',
   zIndex: '9999',
   pointerEvents: 'auto',
+  background: props.debug ? 'rgba(255, 0, 0, 0.3)' : undefined,
+}))
+
+const canvasStyle = computed((): CSSProperties => ({
+  position: 'absolute',
+  left: `${-canvasSize.value.width / 4}px`,
+  top: `-${config.value?.spriteMap.TopShift ?? 0}px`
 }))
 
 const headHotspot = computed(() => {
   if (!config.value) return null
   return {
     width: config.value.spriteMap.TopHotspotWidth,
-    height: config.value.spriteMap.TopHotspotHeight,
+    height: config.value.spriteMap.TopHotspotHeight - (config.value.spriteMap.TopShift ?? 0),
   }
 })
 
 const hotspotStyle = computed((): CSSProperties => {
   if (!headHotspot.value) return {}
-  const left = (canvasSize.value.width - headHotspot.value.width) / 2
+  const left = (canvasSize.value.width/2 - headHotspot.value.width) / 2
   return {
     position: 'absolute',
     left: `${left}px`,
     top: '0px',
     width: `${headHotspot.value.width}px`,
     height: `${headHotspot.value.height}px`,
-    // Debug: uncomment to see hotspot
-    // background: 'rgba(255, 0, 0, 0.3)',
+    background: props.debug ? 'rgba(255, 0, 0, 0.3)' : undefined,
   }
 })
 
@@ -312,6 +330,9 @@ async function animationTick(): Promise<void> {
           frameCounts[directionKey],
           getSprite
         )
+      } else {
+        stateMachine.transitionToIdleOrHover(movement.isMouseOver.value)
+        shouldFollowCursor.value = false
       }
       break
   }
@@ -332,6 +353,7 @@ function handleAnimationComplete(state: State): void {
 // Event handlers
 const handleMouseEnter = useDebounceFn(function (): void {
   movement.setMouseOver(true)
+  shouldFollowCursor.value = false
   resetIdleTimer()
 
   if (stateMachine.currentState.value === State.IDLE || stateMachine.currentState.value === State.WALKING) {
@@ -432,13 +454,19 @@ function handleHeadPat(event: MouseEvent): void {
   }
 }
 
+const centerPoint = computed(() => {
+  const x = movement.position.value.x + canvasSize.value.width / 4
+  const y = movement.position.value.y + canvasSize.value.height / 2
+
+  return { x, y }
+})
+
 // Global mouse tracking for cursor following
 const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
   movement.updateMousePosition(event.clientX, event.clientY)
 
   // Calculate distance from gremlin center to cursor
-  const centerX = movement.position.value.x + canvasSize.value.width / 2
-  const centerY = movement.position.value.y + canvasSize.value.height / 2
+  const { x: centerX, y: centerY } = centerPoint.value
   const dx = event.clientX - centerX
   const dy = event.clientY - centerY
   const distance = Math.sqrt(dx * dx + dy * dy)
@@ -451,7 +479,7 @@ const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
     stateMachine.currentState.value !== State.EMOTE &&
     stateMachine.currentState.value !== State.WALK_IDLE
   ) {
-    if (distance > 150 && distance < 400) { // followRadius
+    if (distance > 10 && distance < 600) {
       if (stateMachine.currentState.value !== State.WALKING && shouldFollowCursor.value) {
         stateMachine.setState(State.WALKING)
         resetIdleTimer()
@@ -462,13 +490,15 @@ const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
   // Continue walking if already walking, stop when within radius
   if (stateMachine.currentState.value === State.WALKING) {
     // reach the target
-    if (distance <= 150) {
+    if (distance <= 10) {
+      console.log(2)
       stateMachine.setState(State.WALK_IDLE)
       shouldFollowCursor.value = false
     }
 
     // target to far
     if (distance >= 600) {
+      console.log(3)
       // TODO: do something different?
       stateMachine.setState(State.WALK_IDLE)
       shouldFollowCursor.value = false
