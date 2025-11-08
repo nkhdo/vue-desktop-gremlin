@@ -14,5 +14,7 @@ export default defineConfig({
   build: {
     outDir: 'dist-demo',
     emptyOutDir: true,
+    // Inline all assets into JS chunks (no separate PNG/WAV files)
+    assetsInlineLimit: 100000000, // 100MB - effectively unlimited
   },
 })

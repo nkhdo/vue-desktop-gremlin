@@ -1,10 +1,10 @@
 import { ref, type Ref } from 'vue'
 import type { CharacterName } from '@/types/character'
 
-// Import all sound files using Vite's glob import
+// Import all sound files using Vite's glob import (lazy loaded to create separate chunks)
 const soundModules = import.meta.glob<string>(
   '../assets/characters/*/sounds/*.wav',
-  { eager: true, import: 'default', query: '?url' }
+  { eager: false, import: 'default', query: '?url' }
 )
 
 /**
@@ -18,12 +18,13 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
   const volume = ref(0.8)
 
   /**
-   * Gets the URL for a sound file
+   * Gets the URL for a sound file (async because of lazy loading)
    */
-  function getSoundUrl(character: CharacterName, fileName: string): string {
-    for (const [key, value] of Object.entries(soundModules)) {
+  async function getSoundUrl(character: CharacterName, fileName: string): Promise<string> {
+    for (const [key, loader] of Object.entries(soundModules)) {
       if (key.includes(`/${character}/sounds/${fileName}`)) {
-        return value as string
+        const url = await loader()
+        return url as string
       }
     }
     throw new Error(`Sound not found: ${character}/sounds/${fileName}`)
@@ -47,7 +48,8 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
     const audio = new Audio()
 
     try {
-      audio.src = getSoundUrl(character, fileName)
+      const url = await getSoundUrl(character, fileName)
+      audio.src = url
       audio.volume = volume.value
 
       // Preload the audio

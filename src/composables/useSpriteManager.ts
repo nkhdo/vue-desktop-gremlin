@@ -15,10 +15,10 @@ const emoteConfigModules = import.meta.glob<{ default: any }>(
   { eager: true }
 )
 
-// Import all sprite images
+// Import all sprite images (lazy loaded to create separate chunks)
 const spriteModules = import.meta.glob<string>(
   '../assets/characters/*/*.png',
-  { eager: true, import: 'default', query: '?url' }
+  { eager: false, import: 'default', query: '?url' }
 )
 
 /**
@@ -37,14 +37,15 @@ export function useSpriteManager(characterName: Ref<CharacterName>) {
   const error = ref<Error | null>(null)
 
   /**
-   * Gets the URL for a sprite file
+   * Gets the URL for a sprite file (async because of lazy loading)
    */
-  function getSpriteUrl(character: CharacterName, fileName: string): string {
+  async function getSpriteUrl(character: CharacterName, fileName: string): Promise<string> {
     const path = `../assets/characters/${character}/${fileName}`
 
-    for (const [key, value] of Object.entries(spriteModules)) {
+    for (const [key, loader] of Object.entries(spriteModules)) {
       if (key.includes(`/${character}/${fileName}`)) {
-        return value as string
+        const url = await loader()
+        return url as string
       }
     }
 
@@ -78,11 +79,13 @@ export function useSpriteManager(characterName: Ref<CharacterName>) {
         reject(new Error(`Failed to load sprite: ${cacheKey}`))
       }
 
-      try {
-        img.src = getSpriteUrl(character, fileName)
-      } catch (err) {
-        reject(err)
-      }
+      getSpriteUrl(character, fileName)
+        .then(url => {
+          img.src = url
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   }
 
