@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, type CSSProperties } from 'vue'
+import { ref, computed, onMounted, onUnmounted, type CSSProperties, useTemplateRef, toRef } from 'vue'
 import { useDebounceFn, useThrottleFn } from '@vueuse/core'
 import { State } from '@/types/states'
 import type { CharacterName } from '@/types/character'
@@ -50,9 +50,8 @@ const props = defineProps<{
 }>()
 
 // Refs
-const containerRef = ref<HTMLDivElement | null>(null)
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-const characterName = ref<CharacterName>(props.character)
+const canvasRef = useTemplateRef('canvasRef')
+const characterName = toRef(() => props.character)
 const shouldFollowCursor = ref(false)
 
 // Composables
@@ -480,7 +479,7 @@ const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
 // Lifecycle
 onMounted(async () => {
   await initialize()
-  await preloadSounds(characterName.value)
+  await preloadSounds()
 
   if (config.value) {
     // Set center offset for movement calculations

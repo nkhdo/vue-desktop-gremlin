@@ -34,10 +34,9 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
    * Loads a sound file
    */
   async function loadSound(
-    character: CharacterName,
     fileName: string
   ): Promise<HTMLAudioElement> {
-    const cacheKey = `${character}/${fileName}`
+    const cacheKey = `${characterName.value}/${fileName}`
 
     // Return cached sound if available
     if (soundCache.has(cacheKey)) {
@@ -48,7 +47,7 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
     const audio = new Audio()
 
     try {
-      const url = await getSoundUrl(character, fileName)
+      const url = await getSoundUrl(characterName.value, fileName)
       audio.src = url
       audio.volume = volume.value
 
@@ -89,7 +88,7 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
     }
 
     try {
-      const audio = await loadSound(characterName.value, fileName)
+      const audio = await loadSound(fileName)
 
       // Clone the audio for simultaneous playback
       const playInstance = audio.cloneNode(true) as HTMLAudioElement
@@ -120,7 +119,7 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
   /**
    * Preloads all sound files for a character
    */
-  async function preloadSounds(character: CharacterName): Promise<void> {
+  async function preloadSounds(): Promise<void> {
     const soundFiles = [
       'intro.wav',
       'run.wav',
@@ -130,7 +129,7 @@ export function useSoundManager(characterName: Ref<CharacterName>) {
     ]
 
     await Promise.allSettled(
-      soundFiles.map((file) => loadSound(character, file))
+      soundFiles.map((file) => loadSound(file))
     )
   }
 
