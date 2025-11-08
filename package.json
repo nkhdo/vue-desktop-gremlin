@@ -37,7 +37,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "preview": "vite preview",
+    "preview:demo": "vite preview --config vite.demo.config.ts --outDir dist-demo"
   },
   "dependencies": {
     "@vueuse/core": "^14.0.0"

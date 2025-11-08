@@ -28,9 +28,9 @@
       <h3>How to Interact:</h3>
       <ul>
         <li><strong>Drag & Drop:</strong> Click and drag the gremlin to move it around</li>
-        <li><strong>Cursor Following:</strong> Hover over the gremlin and it will follow your cursor</li>
         <li><strong>Right-Click:</strong> Triggers a special animation (Mambo time!)</li>
         <li><strong>Head Pat:</strong> Click the top of the gremlin's head to pat it</li>
+        <li><strong>Cursor Following:</strong> Head pat the gremlin and it will follow your cursor</li>
         <li><strong>Idle States:</strong> Leave it alone for 5 minutes and watch it sleep</li>
         <li><strong>Random Emotes:</strong> The gremlin will occasionally emote on its own</li>
       </ul>
