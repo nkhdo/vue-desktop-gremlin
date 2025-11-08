@@ -393,6 +393,7 @@ function handleMouseDown(event: MouseEvent): void {
   const handleMouseUp = () => {
     if (movement.isDragging.value) {
       movement.stopDrag()
+      shouldFollowCursor.value = false // shouldnt follow cursor after being dragged to a new place
       if (stateMachine.currentState.value === State.DRAGGING) {
         stateMachine.transitionToIdleOrHover(movement.isMouseOver.value)
       }
