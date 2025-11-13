@@ -1,6 +1,10 @@
 # @nkhdo/desktop-gremlin
 
 
+## 0.2.2
+### Patch Changes
+- Fix speech bubble event handling to prevent interference with gremlin interactions
+
 ## 0.2.1
 ### Patch Changes
 - Fix package.json exports field to resolve ESLint errors in consuming projects
