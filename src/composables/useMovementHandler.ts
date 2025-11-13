@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { Ref, ref } from 'vue'
 import type { Position, Velocity } from '@/types/character'
 import type { Direction } from '@/types/states'
 
@@ -8,9 +8,10 @@ export interface MovementOptions {
   followRadius?: number
   moveSpeed?: number
   initialPosition?: { x: number, y: number }
+  scripted: Ref<boolean>
 }
 
-export function useMovementHandler(options: MovementOptions = {}) {
+export function useMovementHandler(options: MovementOptions) {
   const followRadius = options.followRadius ?? 50
   const moveSpeed = options.moveSpeed ?? 5
 
@@ -40,7 +41,7 @@ export function useMovementHandler(options: MovementOptions = {}) {
     const distance = Math.sqrt(dx * dx + dy * dy)
 
     // Only follow if outside the follow radius
-    if (distance <= followRadius) {
+    if (distance <= (options.scripted.value ? 10 : followRadius)) {
       return { x: 0, y: 0 }
     }
 

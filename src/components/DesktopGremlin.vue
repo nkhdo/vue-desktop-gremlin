@@ -105,6 +105,7 @@ const { playSound, enableSound, preloadSounds, setVolume } = useSoundManager(cha
   initialVolume: props.volume
 })
 const movement = useMovementHandler({
+  scripted: toRef(() => props.scripted),
   followRadius: props.followRadius,
   moveSpeed: props.moveSpeed,
   initialPosition: positionModel.value
@@ -528,6 +529,9 @@ function handleHeadPat(event: MouseEvent): void {
 
 // Global mouse tracking for cursor following
 const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
+  if (props.scripted) {
+    return
+  }
   movement.updateMousePosition(event.clientX, event.clientY)
 
   // Calculate distance from gremlin center to cursor
@@ -652,6 +656,7 @@ function shy(): void {
 
 // Expose functions for parent component access
 defineExpose({
+  enableSound,
   moveTo,
   sleep,
   emote,
@@ -747,9 +752,6 @@ onUnmounted(() => {
   border: 2px solid #333;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  font-family: sans-serif;
-  font-size: 14px;
-  white-space: nowrap;
   pointer-events: auto;
   z-index: 1;
   cursor: default;
