@@ -89,6 +89,12 @@ const props = withDefaults(defineProps<{
   speechBubblePosition: 'left'
 })
 
+const emit = defineEmits<{
+  click: [],
+  pat: [],
+  shy: []
+}>()
+
 // V-model for position
 const positionModel = defineModel<{ x: number, y: number }>('position', {
   default: () => ({ x: 0, y: 0 })
@@ -454,6 +460,7 @@ function handleMouseLeave(): void {
 function handleMouseDown(event: MouseEvent): void {
   // Enable sound on first interaction
   enableSound()
+  emit('click')
 
   if (stateMachine.currentState.value === State.EMOTE) {
     return
@@ -500,6 +507,7 @@ function handleMouseDown(event: MouseEvent): void {
 
 function handleRightClick(): void {
   enableSound()
+  emit('shy')
 
   if (
     stateMachine.currentState.value !== State.DRAGGING &&
@@ -515,6 +523,7 @@ function handleRightClick(): void {
 function handleHeadPat(event: MouseEvent): void {
   event.stopPropagation()
   enableSound()
+  emit('pat')
 
   if (
     stateMachine.currentState.value !== State.DRAGGING &&
