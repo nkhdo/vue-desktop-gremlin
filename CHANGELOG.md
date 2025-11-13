@@ -1,5 +1,10 @@
 # @nkhdo/desktop-gremlin
 
+## 0.2.4
+### Patch Changes
+- Emit some events
+- Update border style
+
 ## 0.2.3
 ### Patch Changes
 - Small bugs fix
