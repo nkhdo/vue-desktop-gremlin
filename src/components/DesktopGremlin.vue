@@ -25,11 +25,11 @@
         @mousedown.left.stop="handleHeadPat"
       />
       <div
-        v-if="$slots.default"
+        v-if="showSpeechBubble"
         class="desktop-gremlin__message-box"
-        :class="`desktop-gremlin__message-box--${messageBoxPosition}`"
+        :class="`desktop-gremlin__message-box--${speechBubblePosition}`"
       >
-        <slot />
+        <slot name="speech" />
       </div>
     </div>
     <div v-else-if="loading" class="desktop-gremlin__loading">
@@ -72,14 +72,16 @@ const props = withDefaults(defineProps<{
   debug?: boolean
   scripted?: boolean
   volume?: number
-  messageBoxPosition?: 'left' | 'right'
+  showSpeechBubble?: boolean
+  speechBubblePosition?: 'left' | 'right'
 }>(), {
   followRadius: 50,
   moveSpeed: 5,
   debug: false,
   scripted: false,
   volume: 0.8,
-  messageBoxPosition: 'right'
+  showSpeechBubble: false,
+  speechBubblePosition: 'left'
 })
 
 // V-model for position

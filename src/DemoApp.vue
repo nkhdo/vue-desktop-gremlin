@@ -96,10 +96,11 @@
     :debug="debug"
     :scripted="scripted"
     :volume="volume"
-    :message-box-position="messagePosition"
+    :show-speech-bubble="showMessage"
+    :speech-bubble-position="messagePosition"
     v-model:position="position"
   >
-    <template v-if="showMessage">
+    <template #speech>
       {{ messageText }}
     </template>
   </DesktopGremlin>
@@ -194,6 +195,7 @@ onMounted(() => {
   border: 1px solid #ccc;
   border-radius: 4px;
   background: white;
+  color: #333;
   cursor: pointer;
   transition: all 0.2s;
 }
