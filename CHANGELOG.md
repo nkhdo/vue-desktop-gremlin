@@ -1,5 +1,8 @@
 # @nkhdo/desktop-gremlin
 
+## 0.2.3
+### Patch Changes
+- Small bugs fix
 
 ## 0.2.2
 ### Patch Changes
