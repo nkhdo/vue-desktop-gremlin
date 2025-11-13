@@ -1,6 +1,19 @@
 # @nkhdo/desktop-gremlin
 
 
+## 0.2.0
+### Minor Changes
+- Add speech bubble feature for character dialogue
+- Add scripted mode for pre-programmed behavior sequences
+- Add `volume` prop for sound effect control
+- Add position model (v-model support) for programmatic positioning
+- Change cursor following trigger from head pat to right-click
+
+### Patch Changes
+- Improve drag and drop behavior
+- Improve position handling and movement calculations
+- Fix mouse movement handler
+
 ## 0.1.3
 ### Patch Changes
 - Improve hitbox & cursor following mechanism

@@ -127,7 +127,7 @@ function changeCharacter(newCharacter: CharacterName) {
 }
 
 onMounted(() => {
-  window.gremlin = gremlinRef.value
+  (window as any).gremlin = gremlinRef.value
 })
 </script>
 

@@ -1,6 +1,6 @@
 {
   "name": "@nkhdo/desktop-gremlin",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Animated desktop pet component for Vue 3",
   "keywords": [
     "vue",
