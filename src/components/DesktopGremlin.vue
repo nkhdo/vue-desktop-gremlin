@@ -749,8 +749,13 @@ onUnmounted(() => {
   margin-bottom: 10px;
   padding: 8px 12px;
   background: white;
-  border: 2px solid #333;
+  border: 4px solid transparent;
   border-radius: 8px;
+  background-image:
+    linear-gradient(white, white),
+    linear-gradient(135deg, #8D8EF6, #67A4F3, #77C9FF, #8CEADA);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   pointer-events: auto;
   z-index: 1;
@@ -764,8 +769,8 @@ onUnmounted(() => {
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 8px 6px 0 6px;
-  border-color: #333 transparent transparent transparent;
+  border-width: 10px 8px 0 8px;
+  border-color: #77C9FF transparent transparent transparent;
 }
 
 .desktop-gremlin__message-box::before {
