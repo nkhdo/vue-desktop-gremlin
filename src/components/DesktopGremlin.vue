@@ -451,6 +451,8 @@ function handleRightClick(): void {
     stateMachine.currentState.value !== State.CLICK
   ) {
     stateMachine.setState(State.CLICK)
+    // only follow cursor after right click
+    shouldFollowCursor.value = true
   }
 }
 
@@ -466,8 +468,6 @@ function handleHeadPat(event: MouseEvent): void {
   ) {
     resetIdleTimer()
     stateMachine.setState(State.PAT)
-    // only follow cursor after head pad
-    shouldFollowCursor.value = true
   }
 }
 
