@@ -1,6 +1,6 @@
 {
   "name": "@nkhdo/desktop-gremlin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Animated desktop pet component for Vue 3",
   "keywords": [
     "vue",
@@ -23,10 +23,12 @@
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/desktop-gremlin.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/desktop-gremlin.js"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
   },
   "main": "./dist/desktop-gremlin.js",
   "types": "./dist/index.d.ts",

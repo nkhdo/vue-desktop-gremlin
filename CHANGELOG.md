@@ -1,6 +1,10 @@
 # @nkhdo/desktop-gremlin
 
 
+## 0.2.1
+### Patch Changes
+- Fix package.json exports field to resolve ESLint errors in consuming projects
+
 ## 0.2.0
 ### Minor Changes
 - Add speech bubble feature for character dialogue
