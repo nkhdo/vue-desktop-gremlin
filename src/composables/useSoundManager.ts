@@ -13,9 +13,13 @@ const soundModules = import.meta.glob<string>(
 const soundCache = new Map<string, HTMLAudioElement>()
 const lastPlayed = new Map<string, number>()
 
-export function useSoundManager(characterName: Ref<CharacterName>) {
+export interface SoundManagerOptions {
+  initialVolume?: number
+}
+
+export function useSoundManager(characterName: Ref<CharacterName>, options: SoundManagerOptions = {}) {
   const soundEnabled = ref(false)
-  const volume = ref(0.8)
+  const volume = ref(options.initialVolume ?? 0.8)
 
   /**
    * Gets the URL for a sound file (async because of lazy loading)

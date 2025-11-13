@@ -64,11 +64,13 @@ const props = withDefaults(defineProps<{
   moveSpeed?: number
   debug?: boolean
   scripted?: boolean
+  volume?: number
 }>(), {
   followRadius: 50,
   moveSpeed: 5,
   debug: false,
-  scripted: false
+  scripted: false,
+  volume: 0.8
 })
 
 // V-model for position
@@ -83,7 +85,9 @@ const shouldFollowCursor = ref(false)
 
 // Composables
 const { config, loading, error, getSprite, initialize } = useSpriteManager(characterName)
-const { playSound, enableSound, preloadSounds } = useSoundManager(characterName)
+const { playSound, enableSound, preloadSounds, setVolume } = useSoundManager(characterName, {
+  initialVolume: props.volume
+})
 const movement = useMovementHandler({
   followRadius: props.followRadius,
   moveSpeed: props.moveSpeed,
@@ -104,6 +108,11 @@ watch(positionModel, (newPosition) => {
     movement.position.value = { ...newPosition }
   }
 }, { deep: true })
+
+// Watch volume prop changes
+watch(() => props.volume, (newVolume) => {
+  setVolume(newVolume)
+})
 
 // Timers
 const idleTimerId = ref<number | null>(null)
@@ -633,6 +642,7 @@ defineExpose({
   idle,
   pat,
   shy,
+  setVolume,
 })
 
 // Lifecycle

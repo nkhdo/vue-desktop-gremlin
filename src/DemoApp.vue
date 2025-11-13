@@ -22,6 +22,17 @@
           Rice Shower
         </button>
       </div>
+      <div class="volume-control">
+        <label for="input-volume">Volume: {{ Math.round(volume * 100) }}%</label>
+        <input
+          id="input-volume"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          v-model.number="volume"
+        />
+      </div>
       <div class="debug-selector">
         <input id="input-debug" type="checkbox" v-model="debug" />
         <label for="input-debug">Debug</label>
@@ -53,11 +64,12 @@
 
   <!-- The gremlin component -->
   <DesktopGremlin
-  ref="gremlin"
+    ref="gremlin"
     :key="character"
     :character="character"
     :debug="debug"
     :scripted="scripted"
+    :volume="volume"
     v-model:position="position"
   />
 </template>
@@ -71,6 +83,7 @@ const gremlinRef = useTemplateRef('gremlin')
 const character = ref<CharacterName>('mambo')
 const debug = ref(false)
 const scripted = ref(false)
+const volume = ref(0.8)
 
 const position = ref({ x: 100, y: 100 })
 
@@ -82,3 +95,21 @@ onMounted(() => {
   window.gremlin = gremlinRef.value
 })
 </script>
+
+<style scoped>
+.volume-control {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.volume-control label {
+  font-weight: 500;
+}
+
+.volume-control input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
+</style>
