@@ -41,6 +41,32 @@
         <input id="input-scripted" type="checkbox" v-model="scripted" />
         <label for="input-scripted">Scripted</label>
       </div>
+      <div class="message-box-controls">
+        <h3>Message Box:</h3>
+        <div class="debug-selector">
+          <input id="show-message" type="checkbox" v-model="showMessage" />
+          <label for="show-message">Show Message</label>
+        </div>
+        <div v-if="showMessage" class="message-input">
+          <label for="message-text">Message:</label>
+          <input id="message-text" type="text" v-model="messageText" placeholder="Type a message..." />
+        </div>
+        <div v-if="showMessage" class="position-selector">
+          <label>Position:</label>
+          <button
+            @click="messagePosition = 'left'"
+            :class="{ active: messagePosition === 'left' }"
+          >
+            Left
+          </button>
+          <button
+            @click="messagePosition = 'right'"
+            :class="{ active: messagePosition === 'right' }"
+          >
+            Right
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="instructions">
@@ -70,8 +96,13 @@
     :debug="debug"
     :scripted="scripted"
     :volume="volume"
+    :message-box-position="messagePosition"
     v-model:position="position"
-  />
+  >
+    <template v-if="showMessage">
+      {{ messageText }}
+    </template>
+  </DesktopGremlin>
 </template>
 
 <script setup lang="ts">
@@ -84,6 +115,9 @@ const character = ref<CharacterName>('mambo')
 const debug = ref(false)
 const scripted = ref(false)
 const volume = ref(0.8)
+const showMessage = ref(false)
+const messageText = ref('Hello! 👋')
+const messagePosition = ref<'left' | 'right'>('right')
 
 const position = ref({ x: 100, y: 100 })
 
@@ -111,5 +145,66 @@ onMounted(() => {
 .volume-control input[type="range"] {
   width: 100%;
   cursor: pointer;
+}
+
+.message-box-controls {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+}
+
+.message-box-controls h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.message-input {
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.message-input label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.message-input input[type="text"] {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.position-selector {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.position-selector label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.position-selector button {
+  padding: 0.4rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.position-selector button:hover {
+  background: #f5f5f5;
+}
+
+.position-selector button.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
 }
 </style>

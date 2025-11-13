@@ -24,6 +24,13 @@
         :style="hotspotStyle"
         @mousedown.left.stop="handleHeadPat"
       />
+      <div
+        v-if="$slots.default"
+        class="desktop-gremlin__message-box"
+        :class="`desktop-gremlin__message-box--${messageBoxPosition}`"
+      >
+        <slot />
+      </div>
     </div>
     <div v-else-if="loading" class="desktop-gremlin__loading">
       Loading gremlin...
@@ -65,12 +72,14 @@ const props = withDefaults(defineProps<{
   debug?: boolean
   scripted?: boolean
   volume?: number
+  messageBoxPosition?: 'left' | 'right'
 }>(), {
   followRadius: 50,
   moveSpeed: 5,
   debug: false,
   scripted: false,
-  volume: 0.8
+  volume: 0.8,
+  messageBoxPosition: 'right'
 })
 
 // V-model for position
@@ -720,5 +729,70 @@ onUnmounted(() => {
 
 .desktop-gremlin__error {
   background: rgba(139, 0, 0, 0.9);
+}
+
+.desktop-gremlin__message-box {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background: white;
+  border: 2px solid #333;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-family: sans-serif;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.desktop-gremlin__message-box::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 8px 6px 0 6px;
+  border-color: #333 transparent transparent transparent;
+}
+
+.desktop-gremlin__message-box::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 4px 0 4px;
+  border-color: white transparent transparent transparent;
+  margin-top: -1px;
+}
+
+.desktop-gremlin__message-box--left {
+  right: 50%;
+  transform: translateX(-10px);
+}
+
+.desktop-gremlin__message-box--left::after {
+  right: 10px;
+}
+
+.desktop-gremlin__message-box--left::before {
+  right: 12px;
+}
+
+.desktop-gremlin__message-box--right {
+  left: 50%;
+  transform: translateX(10px);
+}
+
+.desktop-gremlin__message-box--right::after {
+  left: 10px;
+}
+
+.desktop-gremlin__message-box--right::before {
+  left: 12px;
 }
 </style>
