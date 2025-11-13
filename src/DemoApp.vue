@@ -101,7 +101,12 @@
     v-model:position="position"
   >
     <template #speech>
-      {{ messageText }}
+      <div>
+        {{ messageText }}
+      </div>
+      <div>
+        <button @click="onButtonClick()">Click me</button>
+      </div>
     </template>
   </DesktopGremlin>
 </template>
@@ -120,10 +125,14 @@ const showMessage = ref(false)
 const messageText = ref('Hello! 👋')
 const messagePosition = ref<'left' | 'right'>('right')
 
-const position = ref({ x: 100, y: 100 })
+const position = ref({ x: 500, y: 500 })
 
 function changeCharacter(newCharacter: CharacterName) {
   character.value = newCharacter
+}
+
+function onButtonClick() {
+  alert('Clicked!!')
 }
 
 onMounted(() => {

@@ -28,6 +28,11 @@
         v-if="showSpeechBubble"
         class="desktop-gremlin__message-box"
         :class="`desktop-gremlin__message-box--${speechBubblePosition}`"
+        @mouseenter.stop
+        @mouseleave.stop
+        @mousedown.stop
+        @mouseup.stop
+        @contextmenu.stop
       >
         <slot name="speech" />
       </div>
@@ -747,6 +752,7 @@ onUnmounted(() => {
   white-space: nowrap;
   pointer-events: auto;
   z-index: 1;
+  cursor: default;
 }
 
 .desktop-gremlin__message-box::after {
