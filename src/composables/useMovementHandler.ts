@@ -20,7 +20,6 @@ export function useMovementHandler(options: MovementOptions = {}) {
   const dragOffset = ref<Position>({ x: 0, y: 0 })
   const mousePosition = ref<Position>({ x: 0, y: 0 })
   const isMouseOver = ref(false)
-  const centerOffset = ref<Position>({ x: 150, y: 150 })
 
   /**
    * Updates cursor position for following behavior
@@ -34,8 +33,8 @@ export function useMovementHandler(options: MovementOptions = {}) {
    */
   function calculateFollowVelocity(): Velocity {
     // Calculate from center of gremlin
-    const centerX = position.value.x + centerOffset.value.x
-    const centerY = position.value.y + centerOffset.value.y
+    const centerX = position.value.x
+    const centerY = position.value.y
     const dx = mousePosition.value.x - centerX
     const dy = mousePosition.value.y - centerY
     const distance = Math.sqrt(dx * dx + dy * dy)
@@ -53,13 +52,6 @@ export function useMovementHandler(options: MovementOptions = {}) {
       x: dirX * moveSpeed,
       y: dirY * moveSpeed,
     }
-  }
-
-  /**
-   * Sets the center offset for distance calculations
-   */
-  function setCenterOffset(offsetX: number, offsetY: number): void {
-    centerOffset.value = { x: offsetX, y: offsetY }
   }
 
   /**
@@ -164,6 +156,5 @@ export function useMovementHandler(options: MovementOptions = {}) {
     updatePosition,
     setMouseOver,
     isMoving,
-    setCenterOffset,
   }
 }

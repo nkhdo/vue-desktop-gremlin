@@ -34,11 +34,12 @@
       v-if="debug"
       :style="{
         position: 'fixed',
-        top: `${centerPoint.y}px`,
-        left: `${centerPoint.x}px`,
+        top: `${movement.position.value.y}px`,
+        left: `${movement.position.value.x}px`,
         zIndex: 10000,
         color: 'red',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        transform: 'translate(-50%, -50%)'
       }"
     >•</div>
   </Teleport>
@@ -139,7 +140,10 @@ const containerStyle = computed((): CSSProperties => ({
   cursor: movement.isDragging.value ? 'grabbing' : 'grab',
   zIndex: '9999',
   pointerEvents: 'auto',
-  background: props.debug ? 'rgba(255, 0, 0, 0.3)' : undefined,
+  transformOrigin: 'center center',
+  transform: 'translate(-50%, -50%)',
+  borderRadius: '100%',
+  background: props.debug ? 'rgba(255, 0, 0, 0.3)' : undefined
 }))
 
 const canvasStyle = computed((): CSSProperties => ({
@@ -165,6 +169,7 @@ const hotspotStyle = computed((): CSSProperties => {
     top: '0px',
     width: `${headHotspot.value.width}px`,
     height: `${headHotspot.value.height}px`,
+    borderRadius: '100%',
     background: props.debug ? 'rgba(255, 0, 0, 0.3)' : undefined,
   }
 })
@@ -466,19 +471,12 @@ function handleHeadPat(event: MouseEvent): void {
   }
 }
 
-const centerPoint = computed(() => {
-  const x = movement.position.value.x + canvasSize.value.width / 4
-  const y = movement.position.value.y + canvasSize.value.height / 2
-
-  return { x, y }
-})
-
 // Global mouse tracking for cursor following
 const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
   movement.updateMousePosition(event.clientX, event.clientY)
 
   // Calculate distance from gremlin center to cursor
-  const { x: centerX, y: centerY } = centerPoint.value
+  const { x: centerX, y: centerY } = movement.position.value
   const dx = event.clientX - centerX
   const dy = event.clientY - centerY
   const distance = Math.sqrt(dx * dx + dy * dy)
@@ -527,12 +525,6 @@ onMounted(async () => {
   await preloadSounds()
 
   if (config.value) {
-    // Set center offset for movement calculations
-    movement.setCenterOffset(
-      config.value.spriteMap.FrameWidth / 4,
-      (config.value.spriteMap.FrameHeight - (config.value.spriteMap.TopShift ?? 0)) / 2
-    )
-
     // Initialize canvas
     animation.initCanvas()
 
