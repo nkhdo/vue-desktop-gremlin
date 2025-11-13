@@ -6,7 +6,6 @@
       :style="containerStyle"
       @mouseenter="handleMouseEnter"
       @mouseleave="handleMouseLeave"
-      @mousemove="handleMouseMove"
       @mousedown="handleMouseDown"
       @contextmenu.prevent="handleRightClick"
     >
@@ -416,12 +415,6 @@ function handleMouseLeave(): void {
   }
 }
 
-function handleMouseMove(event: MouseEvent): void {
-  if (movement.isDragging.value) {
-    movement.updateDrag(event.clientX, event.clientY)
-  }
-}
-
 function handleMouseDown(event: MouseEvent): void {
   // Enable sound on first interaction
   enableSound()
@@ -442,22 +435,31 @@ function handleMouseDown(event: MouseEvent): void {
     ) {
       stateMachine.setState(State.DRAGGING)
       movement.startDrag(event.clientX, event.clientY)
-    }
-  }
 
-  // Mouse up handler
-  const handleMouseUp = () => {
-    if (movement.isDragging.value) {
-      movement.stopDrag()
-      shouldFollowCursor.value = false // shouldnt follow cursor after being dragged to a new place
-      if (stateMachine.currentState.value === State.DRAGGING) {
-        stateMachine.transitionToIdleOrHover(movement.isMouseOver.value)
+      // Mouse move handler for dragging
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        if (movement.isDragging.value) {
+          movement.updateDrag(moveEvent.clientX, moveEvent.clientY)
+        }
       }
-    }
-    document.removeEventListener('mouseup', handleMouseUp)
-  }
 
-  document.addEventListener('mouseup', handleMouseUp)
+      // Mouse up handler
+      const handleMouseUp = () => {
+        if (movement.isDragging.value) {
+          movement.stopDrag()
+          shouldFollowCursor.value = false // shouldnt follow cursor after being dragged to a new place
+          if (stateMachine.currentState.value === State.DRAGGING) {
+            stateMachine.transitionToIdleOrHover(movement.isMouseOver.value)
+          }
+        }
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+  }
 }
 
 function handleRightClick(): void {
