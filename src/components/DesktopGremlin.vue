@@ -460,7 +460,6 @@ function handleMouseLeave(): void {
 function handleMouseDown(event: MouseEvent): void {
   // Enable sound on first interaction
   enableSound()
-  emit('click')
 
   if (stateMachine.currentState.value === State.EMOTE) {
     return
@@ -470,6 +469,7 @@ function handleMouseDown(event: MouseEvent): void {
   resetEmoteTimer()
 
   if (event.button === 0) {
+    emit('click')
     // Left click
     if (
       stateMachine.currentState.value !== State.DRAGGING &&
@@ -758,7 +758,7 @@ onUnmounted(() => {
   margin-bottom: 10px;
   padding: 8px 12px;
   background: white;
-  border: 4px solid transparent;
+  border: 2px solid transparent;
   border-radius: 8px;
   background-image:
     linear-gradient(white, white),

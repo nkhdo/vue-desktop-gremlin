@@ -99,12 +99,15 @@
     :show-speech-bubble="showMessage"
     :speech-bubble-position="messagePosition"
     v-model:position="position"
+    @click="onClick"
+    @shy="onShy"
+    @pat="onHeadPad"
   >
     <template #speech>
-      <div>
+      <div style="min-width: 150px">
         {{ messageText }}
       </div>
-      <div>
+      <div style="margin-top: 8px;">
         <button @click="onButtonClick()">Click me</button>
       </div>
     </template>
@@ -133,6 +136,18 @@ function changeCharacter(newCharacter: CharacterName) {
 
 function onButtonClick() {
   alert('Clicked!!')
+}
+
+function onClick() {
+  console.log('click')
+}
+
+function onShy() {
+  console.log('shy')
+}
+
+function onHeadPad() {
+  console.log('pad')
 }
 
 onMounted(() => {
