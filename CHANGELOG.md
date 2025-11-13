@@ -1,5 +1,9 @@
 # @nkhdo/desktop-gremlin
 
+## 0.2.5
+### Patch Changes
+- Small bugs fix
+
 ## 0.2.4
 ### Patch Changes
 - Emit some events
