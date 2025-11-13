@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, type CSSProperties, useTemplateRef, toRef } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, type CSSProperties, useTemplateRef, toRef } from 'vue'
 import { useDebounceFn, useThrottleFn } from '@vueuse/core'
 import { State } from '@/types/states'
 import type { CharacterName } from '@/types/character'
@@ -59,15 +59,18 @@ import { useSoundManager } from '@/composables/useSoundManager'
 // Props
 const props = withDefaults(defineProps<{
   character: CharacterName
-  initialPosition?: { x: number, y: number }
   followRadius?: number
   moveSpeed?: number
   debug?: boolean
 }>(), {
-  initialPosition: () => ({ x: 0, y: 0 }),
   followRadius: 50,
   moveSpeed: 5,
   debug: false
+})
+
+// V-model for position
+const positionModel = defineModel<{ x: number, y: number }>('position', {
+  default: () => ({ x: 0, y: 0 })
 })
 
 // Refs
@@ -81,8 +84,23 @@ const { playSound, enableSound, preloadSounds } = useSoundManager(characterName)
 const movement = useMovementHandler({
   followRadius: props.followRadius,
   moveSpeed: props.moveSpeed,
-  initialPosition: props.initialPosition
+  initialPosition: positionModel.value
 })
+
+// Sync internal movement position with v-model
+watch(() => movement.position.value, (newPosition) => {
+  positionModel.value = { ...newPosition }
+}, { deep: true })
+
+// Sync v-model changes to internal movement position
+watch(positionModel, (newPosition) => {
+  if (newPosition && (
+    newPosition.x !== movement.position.value.x ||
+    newPosition.y !== movement.position.value.y
+  )) {
+    movement.position.value = { ...newPosition }
+  }
+}, { deep: true })
 
 // Timers
 const idleTimerId = ref<number | null>(null)

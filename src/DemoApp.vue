@@ -40,14 +40,19 @@
       </ul>
       <p><em>Note: Sound will be enabled after your first interaction!</em></p>
     </div>
+
+    <div class="instructions">
+      Current position: ({{ position.x }}, {{ position.y }})
+    </div>
   </div>
+
 
   <!-- The gremlin component -->
   <DesktopGremlin
     :key="character"
     :character="character"
     :debug="debug"
-    :initial-position="{ x: 600, y: 100 }"
+    v-model:position="position"
   />
 </template>
 
@@ -58,6 +63,8 @@ import type { CharacterName } from './types/character'
 
 const character = ref<CharacterName>('mambo')
 const debug = ref(false)
+
+const position = ref({ x: 100, y: 100 })
 
 function changeCharacter(newCharacter: CharacterName) {
   character.value = newCharacter
