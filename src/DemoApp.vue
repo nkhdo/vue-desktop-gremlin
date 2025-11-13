@@ -26,6 +26,10 @@
         <input id="input-debug" type="checkbox" v-model="debug" />
         <label for="input-debug">Debug</label>
       </div>
+      <div class="debug-selector">
+        <input id="input-scripted" type="checkbox" v-model="scripted" />
+        <label for="input-scripted">Scripted</label>
+      </div>
     </div>
 
     <div class="instructions">
@@ -49,24 +53,32 @@
 
   <!-- The gremlin component -->
   <DesktopGremlin
+  ref="gremlin"
     :key="character"
     :character="character"
     :debug="debug"
+    :scripted="scripted"
     v-model:position="position"
   />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref, useTemplateRef } from 'vue'
 import DesktopGremlin from './components/DesktopGremlin.vue'
 import type { CharacterName } from './types/character'
 
+const gremlinRef = useTemplateRef('gremlin')
 const character = ref<CharacterName>('mambo')
 const debug = ref(false)
+const scripted = ref(false)
 
 const position = ref({ x: 100, y: 100 })
 
 function changeCharacter(newCharacter: CharacterName) {
   character.value = newCharacter
 }
+
+onMounted(() => {
+  window.gremlin = gremlinRef.value
+})
 </script>

@@ -4,10 +4,12 @@
       v-if="!loading && !error"
       class="desktop-gremlin"
       :style="containerStyle"
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
-      @mousedown="handleMouseDown"
-      @contextmenu.prevent="handleRightClick"
+      v-on="scripted ? {} : {
+        mouseenter: handleMouseEnter,
+        mouseleave: handleMouseLeave,
+        mousedown: handleMouseDown,
+        contextmenu: (e: Event) => { e.preventDefault(); handleRightClick() }
+      }"
     >
       <canvas
         ref="canvasRef"
@@ -17,7 +19,7 @@
         class="desktop-gremlin__canvas"
       />
       <div
-        v-if="headHotspot"
+        v-if="headHotspot && !scripted"
         class="desktop-gremlin__hotspot"
         :style="hotspotStyle"
         @mousedown.left.stop="handleHeadPat"
@@ -61,10 +63,12 @@ const props = withDefaults(defineProps<{
   followRadius?: number
   moveSpeed?: number
   debug?: boolean
+  scripted?: boolean
 }>(), {
   followRadius: 50,
   moveSpeed: 5,
-  debug: false
+  debug: false,
+  scripted: false
 })
 
 // V-model for position
@@ -106,6 +110,7 @@ const idleTimerId = ref<number | null>(null)
 const walkIdleTimerId = ref<number | null>(null)
 const emoteTimerId = ref<number | null>(null)
 const emoteDurationTimerId = ref<number | null>(null)
+const isInfiniteEmote = ref(false)
 
 // State machine callbacks
 const stateMachine = useStateMachine(config, {
@@ -154,9 +159,9 @@ const containerStyle = computed((): CSSProperties => ({
   top: `${movement.position.value.y}px`,
   width: `${canvasSize.value.width / 2}px`,
   height: `${canvasSize.value.height - (config.value?.spriteMap.TopShift ?? 0)}px`,
-  cursor: movement.isDragging.value ? 'grabbing' : 'grab',
+  cursor: props.scripted ? 'default' : (movement.isDragging.value ? 'grabbing' : 'grab'),
   zIndex: '9999',
-  pointerEvents: 'auto',
+  pointerEvents: props.scripted ? 'none' : 'auto',
   transformOrigin: 'center center',
   transform: 'translate(-50%, -50%)',
   borderRadius: '100%',
@@ -242,6 +247,11 @@ function resetEmoteTimer(): void {
 }
 
 function startEmoteDurationTimer(duration: number): void {
+  // Skip timer if infinite emote is enabled
+  if (props.scripted && isInfiniteEmote.value) {
+    return
+  }
+
   emoteDurationTimerId.value = window.setTimeout(() => {
     if (stateMachine.currentState.value === State.EMOTE) {
       stateMachine.transitionToIdleOrHover(movement.isMouseOver.value)
@@ -531,13 +541,99 @@ const handleGlobalMouseMove = useThrottleFn(function (event: MouseEvent): void {
 
     // target to far
     if (distance >= props.followRadius * 10) {
-      console.log(3)
       // TODO: do something different?
       stateMachine.setState(State.WALK_IDLE)
       shouldFollowCursor.value = false
     }
   }
 }, 100)
+
+// Exposed functions for scripted mode
+/**
+ * Move gremlin to a specific position
+ */
+function moveTo(x: number, y: number, smooth = false): void {
+  if (!props.scripted) {
+    return
+  }
+  if (smooth) {
+    // Set target and trigger walking animation
+    isInfiniteEmote.value = false
+    movement.updateMousePosition(x, y)
+    shouldFollowCursor.value = true
+    stateMachine.setState(State.WALKING)
+  } else {
+    // Instant move
+    movement.position.value = { x, y }
+  }
+}
+
+/**
+ * Trigger sleep state
+ */
+function sleep(): void {
+  if (!props.scripted) {
+    return
+  }
+  isInfiniteEmote.value = false
+  stateMachine.setState(State.SLEEPING)
+}
+
+/**
+ * Trigger emote state
+ * @param infinite - If true, emote will loop infinitely until stopped
+ */
+function emote(infinite = false): void {
+  if (!props.scripted) {
+    return
+  }
+  isInfiniteEmote.value = infinite
+  stateMachine.setState(State.EMOTE)
+}
+
+/**
+ * Return to idle state
+ */
+function idle(): void {
+  if (!props.scripted) {
+    return
+  }
+  isInfiniteEmote.value = false
+  shouldFollowCursor.value = false
+  stateMachine.setState(State.IDLE)
+}
+
+/**
+ * Trigger pat animation
+ */
+function pat(): void {
+  if (!props.scripted) {
+    return
+  }
+  isInfiniteEmote.value = false
+  stateMachine.setState(State.PAT)
+}
+
+/**
+ * Trigger right click animation
+ */
+function shy(): void {
+  if (!props.scripted) {
+    return
+  }
+  isInfiniteEmote.value = false
+  stateMachine.setState(State.CLICK)
+}
+
+// Expose functions for parent component access
+defineExpose({
+  moveTo,
+  sleep,
+  emote,
+  idle,
+  pat,
+  shy,
+})
 
 // Lifecycle
 onMounted(async () => {
@@ -555,13 +651,17 @@ onMounted(async () => {
     )
     animation.startAnimationLoop(frameRateLimitedTick)
 
-    // Add global mouse tracking for cursor following
-    document.addEventListener('mousemove', handleGlobalMouseMove)
+    // Add global mouse tracking for cursor following (only in non-scripted mode)
+    if (!props.scripted) {
+      document.addEventListener('mousemove', handleGlobalMouseMove)
+    }
 
-    // Start timers
-    resetIdleTimer()
-    if (config.value.emoteConfig.AnnoyEmote) {
-      resetEmoteTimer()
+    // Start timers (only in non-scripted mode)
+    if (!props.scripted) {
+      resetIdleTimer()
+      if (config.value.emoteConfig.AnnoyEmote) {
+        resetEmoteTimer()
+      }
     }
 
     // Play intro sound
